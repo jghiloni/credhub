@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package proto;
+option java_package = "org.cloudfoundry.credhub.remote.grpc";
+option java_outer_classname = "RemoteBackend";
+option java_multiple_files = true;
+
+message GetByNameRequest {
+  string name = 1;
+  string requester = 2;
+}
+
+message GetByNameResponse {
+  string name = 1;
+  string type = 2;
+  bytes data = 3;
+}
+
+message SetByNameRequest {
+  string name = 1;
+  string type = 2;
+  bytes data = 3;
+  string requester = 4;
+}
+
+message SetByNameResponse {
+  string name = 1;
+  string type = 2;
+  bytes data = 3;
+}
+
+message DeleteByNameRequest {
+  string name = 1;
+  string requester = 2;
+}
+
+message DeleteByNameResponse {}
+
+service CredentialService {
+  rpc Get (GetByNameRequest) returns (GetByNameResponse);
+  rpc Set (SetByNameRequest) returns (SetByNameResponse);
+  rpc Delete (DeleteByNameRequest) returns (DeleteByNameResponse);
+}
