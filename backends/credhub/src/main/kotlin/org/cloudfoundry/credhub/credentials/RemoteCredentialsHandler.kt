@@ -1,8 +1,10 @@
 package org.cloudfoundry.credhub.credentials
 
-
-import org.cloudfoundry.credhub.domain.CredentialVersion
+import org.cloudfoundry.credhub.auth.UserContextHolder
+import org.cloudfoundry.credhub.credential.CredentialValue
+import org.cloudfoundry.credhub.credential.StringCredentialValue
 import org.cloudfoundry.credhub.remote.RemoteBackendClient
+import org.cloudfoundry.credhub.remote.grpc.GetByNameResponse
 import org.cloudfoundry.credhub.requests.BaseCredentialGenerateRequest
 import org.cloudfoundry.credhub.requests.BaseCredentialSetRequest
 import org.cloudfoundry.credhub.views.CredentialView
@@ -10,10 +12,12 @@ import org.cloudfoundry.credhub.views.DataResponse
 import org.cloudfoundry.credhub.views.FindCredentialResult
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.util.UUID
 
 @Service
 @Profile("remote")
-class RemoteCredentialsHandler : CredentialsHandler {
+class RemoteCredentialsHandler(private val userContextHolder: UserContextHolder) : CredentialsHandler {
 
     private var client: RemoteBackendClient = RemoteBackendClient()
 
@@ -46,30 +50,26 @@ class RemoteCredentialsHandler : CredentialsHandler {
     }
 
     override fun getCurrentCredentialVersions(credentialName: String): DataResponse {
-//        println("credentialName = $credentialName")
-//        val value = StringCredentialValue("some-value")
-//        return DataResponse(listOf(CredentialView(
-//            Instant.now(),
-//            UUID.randomUUID(),
-//            credentialName,
-//            "some-type",
-//            value
-//        )))
-//        inal GetByName request = EncryptRequest.newBuilder().setPlain(ByteString.copyFrom(value, Charset.forName(CHARSET))).build();
-//        val response: EncryptResponse
-//        try {
-//            response = blockingStub.encrypt(request)
-//        } catch (e: StatusRuntimeException) {
-//            LOGGER.error("Error for request: " + request.getPlain(), e)
-//            throw e
-//        }
-//
-//        return EncryptedValue(key.getUuid(), response.getCipher().toByteArray(), byteArrayOf())
 
-        val response = client.getByNameRequest(credentialName)
-        println("response = $response")
-        val credentialVersions = emptyList<CredentialVersion>()
-        return DataResponse.fromEntity(credentialVersions)
+        val actor = userContextHolder.userContext.actor
+        val response = client.getByNameRequest(credentialName, actor)
+
+        val credentialValue = getValueFromResponse(response)
+
+        return DataResponse(listOf(CredentialView(
+            Instant.now(),
+            UUID.randomUUID(),
+            credentialName,
+            response.type,
+            credentialValue
+        )))
+    }
+
+    private fun getValueFromResponse(response: GetByNameResponse): CredentialValue? {
+        return when (response.type) {
+            "value" -> StringCredentialValue(response.data.toStringUtf8())
+            else -> null
+        }
     }
 
     override fun getCredentialVersionByUUID(credentialUUID: String): CredentialView {

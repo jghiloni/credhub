@@ -14,19 +14,16 @@ import java.util.concurrent.TimeUnit
 class RemoteBackendClient {
 
     var blockingStub: CredentialServiceGrpc.CredentialServiceBlockingStub = CredentialServiceGrpc.newBlockingStub(
-        NettyChannelBuilder.forAddress(DomainSocketAddress("unix://test-socket.sock"))
+        NettyChannelBuilder.forAddress(DomainSocketAddress("/tmp/socket/test.sock"))
             .eventLoopGroup(EpollEventLoopGroup())
             .channelType(EpollDomainSocketChannel::class.java)
             .negotiationType(NegotiationType.PLAINTEXT)
             .keepAliveTime(GrpcUtil.DEFAULT_KEEPALIVE_TIME_NANOS, TimeUnit.NANOSECONDS)
             .build())
 
-    fun getByNameRequest(credentialName: String): String {
-        val request = GetByNameRequest.newBuilder().setName(credentialName).setRequester("some-actor").build()
+    fun getByNameRequest(credentialName: String, actor: String): GetByNameResponse {
+        val request = GetByNameRequest.newBuilder().setName(credentialName).setRequester(actor).build()
 
-        val getByNameResponse = blockingStub.get(request)
-        println("getByNameResponse = $getByNameResponse")
-
-        return getByNameResponse.name
+        return blockingStub.get(request)
     }
 }

@@ -7,6 +7,7 @@ buildscript {
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
         classpath("org.asciidoctor:asciidoctor-gradle-plugin:${asciiDoctorPluginVersion}")
+        classpath("com.google.protobuf:protobuf-gradle-plugin:0.8.8")
     }
 }
 
@@ -22,6 +23,7 @@ apply from: "${rootDir.toPath()}/ktlint.gradle"
 apply from: "${rootDir.toPath()}/checkstyle-config.gradle"
 apply from: "${rootDir.toPath()}/pmd-config.gradle"
 apply from: "${rootDir.toPath()}/spotbugs.gradle"
+apply plugin: "com.google.protobuf"
 
 repositories {
     mavenCentral()
@@ -63,6 +65,9 @@ dependencies {
     // Other
     compile files("${rootDir.toPath()}/libs/bcpkix-fips-${bcpkixFipsVersion}.jar")
     compile files("${rootDir.toPath()}/libs/bc-fips-${bcFipsVersion}.jar")
+
+    // proto
+    implementation "com.google.api.grpc:proto-google-common-protos:1.12.0"
 
     implementation("com.google.guava:guava:${guavaVersion}")
     implementation("org.apache.commons:commons-lang3:${apacheCommonsLang3Version}")
@@ -108,3 +113,9 @@ task buildAndCopyRestDocsIntoSpringStaticAssetLocation(type: Copy) {
     into project(":applications:credhub-api").file("src/main/resources/static/docs/")
 }
 asciidoctor.finalizedBy(buildAndCopyRestDocsIntoSpringStaticAssetLocation)
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.6.1"
+    }
+}
