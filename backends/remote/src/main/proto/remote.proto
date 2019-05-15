@@ -10,10 +10,12 @@ message GetByNameRequest {
   string requester = 2;
 }
 
-message GetByNameResponse {
+message GetResponse {
   string name = 1;
   string type = 2;
-  bytes data = 3;
+  string id = 3;
+  string versionCreatedAt = 4;
+  bytes data = 5;
 }
 
 message SetByNameRequest {
@@ -37,7 +39,7 @@ message DeleteByNameRequest {
 message DeleteByNameResponse {}
 
 service CredentialService {
-  rpc Get (GetByNameRequest) returns (GetByNameResponse);
+  rpc Get (GetByNameRequest) returns (GetResponse);
   rpc Set (SetByNameRequest) returns (SetByNameResponse);
   rpc Delete (DeleteByNameRequest) returns (DeleteByNameResponse);
 }

@@ -1,10 +1,16 @@
 package org.cloudfoundry.credhub.credentials
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.cloudfoundry.credhub.auth.UserContextHolder
+import org.cloudfoundry.credhub.credential.CertificateCredentialValue
 import org.cloudfoundry.credhub.credential.CredentialValue
+import org.cloudfoundry.credhub.credential.JsonCredentialValue
+import org.cloudfoundry.credhub.credential.RsaCredentialValue
+import org.cloudfoundry.credhub.credential.SshCredentialValue
 import org.cloudfoundry.credhub.credential.StringCredentialValue
+import org.cloudfoundry.credhub.credential.UserCredentialValue
 import org.cloudfoundry.credhub.remote.RemoteBackendClient
-import org.cloudfoundry.credhub.remote.grpc.GetByNameResponse
+import org.cloudfoundry.credhub.remote.grpc.GetResponse
 import org.cloudfoundry.credhub.requests.BaseCredentialGenerateRequest
 import org.cloudfoundry.credhub.requests.BaseCredentialSetRequest
 import org.cloudfoundry.credhub.views.CredentialView
@@ -17,9 +23,12 @@ import java.util.UUID
 
 @Service
 @Profile("remote")
-class RemoteCredentialsHandler(private val userContextHolder: UserContextHolder) : CredentialsHandler {
+class RemoteCredentialsHandler(
+    private val userContextHolder: UserContextHolder,
+    private val objectMapper: ObjectMapper
+) : CredentialsHandler {
 
-    private var client: RemoteBackendClient = RemoteBackendClient()
+    private val client = RemoteBackendClient()
 
     override fun findStartingWithPath(path: String, expiresWithinDays: String): List<FindCredentialResult> {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
@@ -57,19 +66,27 @@ class RemoteCredentialsHandler(private val userContextHolder: UserContextHolder)
         val credentialValue = getValueFromResponse(response)
 
         return DataResponse(listOf(CredentialView(
-            Instant.now(),
-            UUID.randomUUID(),
+            Instant.parse(response.versionCreatedAt),
+            UUID.fromString(response.id),
             credentialName,
             response.type,
             credentialValue
         )))
     }
 
-    private fun getValueFromResponse(response: GetByNameResponse): CredentialValue? {
-        return when (response.type) {
-            "value" -> StringCredentialValue(response.data.toStringUtf8())
-            else -> null
+    private fun getValueFromResponse(response: GetResponse): CredentialValue? {
+        val credentialValue: CredentialValue
+        when (response.type) {
+            "value" -> credentialValue = StringCredentialValue(response.data.toStringUtf8())
+            "password" -> credentialValue = StringCredentialValue(response.data.toStringUtf8())
+            "certificate" -> credentialValue = objectMapper.readValue(response.data.toStringUtf8(), CertificateCredentialValue::class.java)
+            "json" -> credentialValue = objectMapper.readValue(response.data.toStringUtf8(), JsonCredentialValue::class.java)
+            "user" -> credentialValue = objectMapper.readValue(response.data.toStringUtf8(), UserCredentialValue::class.java)
+            "rsa" -> credentialValue = objectMapper.readValue(response.data.toStringUtf8(), RsaCredentialValue::class.java)
+            "ssh" -> credentialValue = objectMapper.readValue(response.data.toStringUtf8(), SshCredentialValue::class.java)
+            else -> throw Exception()
         }
+        return credentialValue
     }
 
     override fun getCredentialVersionByUUID(credentialUUID: String): CredentialView {

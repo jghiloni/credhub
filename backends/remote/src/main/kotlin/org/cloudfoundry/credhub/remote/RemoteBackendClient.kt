@@ -8,7 +8,7 @@ import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.unix.DomainSocketAddress
 import org.cloudfoundry.credhub.remote.grpc.CredentialServiceGrpc
 import org.cloudfoundry.credhub.remote.grpc.GetByNameRequest
-import org.cloudfoundry.credhub.remote.grpc.GetByNameResponse
+import org.cloudfoundry.credhub.remote.grpc.GetResponse
 import java.util.concurrent.TimeUnit
 
 class RemoteBackendClient {
@@ -21,7 +21,7 @@ class RemoteBackendClient {
             .keepAliveTime(GrpcUtil.DEFAULT_KEEPALIVE_TIME_NANOS, TimeUnit.NANOSECONDS)
             .build())
 
-    fun getByNameRequest(credentialName: String, actor: String): GetByNameResponse {
+    fun getByNameRequest(credentialName: String, actor: String): GetResponse {
         val request = GetByNameRequest.newBuilder().setName(credentialName).setRequester(actor).build()
 
         return blockingStub.get(request)
