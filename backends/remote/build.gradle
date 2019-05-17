@@ -48,7 +48,7 @@ dependencies {
     implementation('com.fasterxml.jackson.module:jackson-module-kotlin')
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    
+
 
     // Other
     implementation("org.apache.commons:commons-lang3:${apacheCommonsLang3Version}")
@@ -63,6 +63,10 @@ dependencies {
     //Netty
     implementation "io.netty:netty-transport-native-unix-common:${nettyVersion}"
     implementation "io.netty:netty-all:${nettyVersion}"
+    implementation "io.netty:netty-codec-http2:${nettyVersion}"
+
+    //tcnative
+    implementation "io.netty:netty-tcnative-boringssl-static:2.0.12.Final"
 }
 
 dependencyManagement {

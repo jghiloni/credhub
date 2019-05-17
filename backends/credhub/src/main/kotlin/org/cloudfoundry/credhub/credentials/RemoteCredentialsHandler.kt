@@ -25,10 +25,9 @@ import java.util.UUID
 @Profile("remote")
 class RemoteCredentialsHandler(
     private val userContextHolder: UserContextHolder,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val client: RemoteBackendClient
 ) : CredentialsHandler {
-
-    private val client = RemoteBackendClient()
 
     override fun findStartingWithPath(path: String, expiresWithinDays: String): List<FindCredentialResult> {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
