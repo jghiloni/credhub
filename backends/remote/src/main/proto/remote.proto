@@ -9,6 +9,10 @@ message GetByNameRequest {
   string name = 1;
   string requester = 2;
 }
+message GetByIdRequest {
+  string id = 1;
+  string requester = 2;
+}
 
 message GetResponse {
   string name = 1;
@@ -18,17 +22,18 @@ message GetResponse {
   bytes data = 5;
 }
 
-message SetByNameRequest {
+message SetRequest {
   string name = 1;
   string type = 2;
   bytes data = 3;
   string requester = 4;
 }
 
-message SetByNameResponse {
+message SetResponse {
   string name = 1;
   string type = 2;
-  bytes data = 3;
+  string id = 3;
+  bytes data = 4;
 }
 
 message DeleteByNameRequest {
@@ -36,10 +41,11 @@ message DeleteByNameRequest {
   string requester = 2;
 }
 
-message DeleteByNameResponse {}
+message DeleteResponse {}
 
 service CredentialService {
-  rpc Get (GetByNameRequest) returns (GetResponse);
-  rpc Set (SetByNameRequest) returns (SetByNameResponse);
-  rpc Delete (DeleteByNameRequest) returns (DeleteByNameResponse);
+  rpc GetByName (GetByNameRequest) returns (GetResponse);
+  rpc GetById (GetByIdRequest) returns (GetResponse);
+  rpc Set (SetRequest) returns (SetResponse);
+  rpc Delete (DeleteByNameRequest) returns (DeleteResponse);
 }

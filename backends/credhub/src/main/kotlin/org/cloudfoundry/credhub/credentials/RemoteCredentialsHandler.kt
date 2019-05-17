@@ -73,6 +73,21 @@ class RemoteCredentialsHandler(
         )))
     }
 
+    override fun getCredentialVersionByUUID(credentialUUID: String): CredentialView {
+        val actor = userContextHolder.userContext.actor
+        val response = client.getByIdRequest(credentialUUID, actor)
+
+        val credentialValue = getValueFromResponse(response)
+
+        return CredentialView(
+            Instant.parse(response.versionCreatedAt),
+            UUID.fromString(response.id),
+            response.name,
+            response.type,
+            credentialValue
+        )
+    }
+
     private fun getValueFromResponse(response: GetResponse): CredentialValue? {
         val credentialValue: CredentialValue
         when (response.type) {
@@ -86,9 +101,5 @@ class RemoteCredentialsHandler(
             else -> throw Exception()
         }
         return credentialValue
-    }
-
-    override fun getCredentialVersionByUUID(credentialUUID: String): CredentialView {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 }

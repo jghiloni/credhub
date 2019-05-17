@@ -6,6 +6,7 @@ import io.grpc.netty.NettyChannelBuilder
 import org.cloudfoundry.credhub.ErrorMessages
 import org.cloudfoundry.credhub.exceptions.EntryNotFoundException
 import org.cloudfoundry.credhub.remote.grpc.CredentialServiceGrpc
+import org.cloudfoundry.credhub.remote.grpc.GetByIdRequest
 import org.cloudfoundry.credhub.remote.grpc.GetByNameRequest
 import org.cloudfoundry.credhub.remote.grpc.GetResponse
 import org.springframework.stereotype.Service
@@ -43,7 +44,25 @@ class RemoteBackendClient(
         val getResponse: GetResponse
 
         try {
-            getResponse = blockingStub.get(request)
+            getResponse = blockingStub.getByName(request)
+        } catch (e: RuntimeException) {
+            throw EntryNotFoundException(ErrorMessages.Credential.INVALID_ACCESS)
+        }
+
+        return getResponse
+    }
+
+    fun getByIdRequest(credentialUuid: String, user: String): GetResponse {
+        val request = GetByIdRequest
+            .newBuilder()
+            .setId(credentialUuid)
+            .setRequester(user)
+            .build()
+
+        val getResponse: GetResponse
+
+        try {
+            getResponse = blockingStub.getById(request)
         } catch (e: RuntimeException) {
             throw EntryNotFoundException(ErrorMessages.Credential.INVALID_ACCESS)
         }
