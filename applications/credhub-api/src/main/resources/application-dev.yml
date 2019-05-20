@@ -58,7 +58,3 @@ spring:
 certificates:
   concatenate_cas: false
 
-grpc:
-  trusted_ca: src/test/resources/grpc-certs/grpc_ca_cert.pem
-  client_certificate: src/test/resources/grpc-certs/grpc_client_cert.pem
-  client_private_key: src/test/resources/grpc-certs/grpc_client_key.pem
