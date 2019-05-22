@@ -19,12 +19,15 @@ import org.cloudfoundry.credhub.remote.grpc.CredentialServiceGrpc
 import org.cloudfoundry.credhub.remote.grpc.GetByIdRequest
 import org.cloudfoundry.credhub.remote.grpc.GetByNameRequest
 import org.cloudfoundry.credhub.remote.grpc.GetResponse
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
 
 
 @Service
-class RemoteBackendClient {
+class RemoteBackendClient(
+    @Value("\${backend.socket_file}") private val socketFile: String
+) {
 
     companion object {
         private val LOGGER = LogManager.getLogger(RemoteBackendClient::class.java)
@@ -39,13 +42,14 @@ class RemoteBackendClient {
     init {
         setChannelInfo()
         blockingStub = CredentialServiceGrpc.newBlockingStub(
-            //todo: move socket address to application.yaml
-            NettyChannelBuilder.forAddress(DomainSocketAddress("/tmp/socket/test.sock"))
+            NettyChannelBuilder.forAddress(DomainSocketAddress(socketFile))
                 .eventLoopGroup(group)
                 .channelType(channelType)
                 .negotiationType(NegotiationType.PLAINTEXT)
                 .keepAliveTime(GrpcUtil.DEFAULT_KEEPALIVE_TIME_NANOS, TimeUnit.NANOSECONDS)
                 .build())
+
+        LOGGER.info("using socket file $socketFile")
     }
 
     fun getByNameRequest(credentialName: String, user: String): GetResponse {
