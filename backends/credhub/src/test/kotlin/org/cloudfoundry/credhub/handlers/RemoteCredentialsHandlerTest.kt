@@ -18,6 +18,8 @@ import org.cloudfoundry.credhub.credential.UserCredentialValue
 import org.cloudfoundry.credhub.credentials.RemoteCredentialsHandler
 import org.cloudfoundry.credhub.remote.RemoteBackendClient
 import org.cloudfoundry.credhub.remote.grpc.DeleteResponse
+import org.cloudfoundry.credhub.remote.grpc.FindResponse
+import org.cloudfoundry.credhub.remote.grpc.FindResult
 import org.cloudfoundry.credhub.remote.grpc.GetResponse
 import org.cloudfoundry.credhub.remote.grpc.SetResponse
 import org.cloudfoundry.credhub.requests.CertificateSetRequest
@@ -32,7 +34,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.isNull
 import org.mockito.Mockito.mock
 import java.security.Security
 import java.time.Instant
@@ -659,5 +663,47 @@ class RemoteCredentialsHandlerTest {
         assertThatThrownBy {
             subject.deleteCredential(CREDENTIAL_NAME)
         }.hasMessage(ErrorMessages.Credential.INVALID_ACCESS)
+    }
+
+    @Test
+    fun findCredential_withName_returnsCorrectDataResponse() {
+//        val response = FindResponse
+//            .newBuilder()
+//            .setResults(0, FindResult
+//                .newBuilder()
+//                .setName("/test/some-credential")
+//                .setVersionCreatedAt(versionCreatedAt))
+//            .setResults(1, FindResult
+//                .newBuilder()
+//                .setName("/test/some-other-credential")
+//                .setVersionCreatedAt(versionCreatedAt))
+//            .setResults(2, FindResult
+//                .newBuilder()
+//                .setName("/test/another-credential")
+//                .setVersionCreatedAt(versionCreatedAt)) //other
+
+
+        val response = FindResponse
+            .newBuilder()
+            .addResults(FindResult
+                .newBuilder()
+                .setName("/test/some-other-credential")
+                .setVersionCreatedAt(versionCreatedAt))
+            .addResults(FindResult
+                .newBuilder()
+                .setName("/test/another-credential")
+                .setVersionCreatedAt(versionCreatedAt)) //other
+            .build()
+
+        `when`(client.findContainingNameRequest("other", USER)).thenReturn(response)
+
+        val result = subject.findContainingName("other", "365")
+
+        assertEquals(result.size, 2)
+        assertEquals(result.get(0).name, "/test/some-other-credential")
+        assertEquals(result.get(1).name, "/test/another-credential")
+        assertEquals(result.get(0).versionCreatedAt.toString(), versionCreatedAt)
+        assertEquals(result.get(1).versionCreatedAt.toString(), versionCreatedAt)
+
     }
 }
