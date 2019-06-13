@@ -25,6 +25,7 @@ import org.cloudfoundry.credhub.requests.GenerationParameters
 import org.cloudfoundry.credhub.requests.RsaGenerationParameters
 import org.cloudfoundry.credhub.requests.SshGenerationParameters
 import org.cloudfoundry.credhub.requests.StringGenerationParameters
+import org.cloudfoundry.credhub.services.PermissionCheckingService
 import org.cloudfoundry.credhub.views.CredentialView
 import org.cloudfoundry.credhub.views.DataResponse
 import org.cloudfoundry.credhub.views.FindCredentialResult
@@ -39,7 +40,8 @@ class RemoteCredentialsHandler(
     private val userContextHolder: UserContextHolder,
     private val objectMapper: ObjectMapper,
     private val client: RemoteBackendClient,
-    private val credentialGenerator: UniversalCredentialGenerator
+    private val credentialGenerator: UniversalCredentialGenerator,
+    private val permissionCheckingService: PermissionCheckingService
 ) : CredentialsHandler {
 
     override fun findStartingWithPath(path: String, expiresWithinDays: String): List<FindCredentialResult> {

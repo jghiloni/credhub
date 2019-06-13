@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -17,6 +18,7 @@ import org.cloudfoundry.credhub.data.PermissionData;
 import org.cloudfoundry.credhub.data.PermissionDataService;
 
 @Service
+@Profile("!remote")
 @SuppressFBWarnings(
   value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
   justification = "Let's refactor this class into kotlin"
