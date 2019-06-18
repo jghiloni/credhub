@@ -40,6 +40,13 @@ public class CertificateCredentialVersionData extends CredentialVersionData<Cert
   @Column(table = CertificateCredentialVersionData.TABLE_NAME)
   private Instant expiryDate;
 
+  @Column(table = CertificateCredentialVersionData.TABLE_NAME)
+  private Boolean certificateAuthority;
+
+  @Column(table = CertificateCredentialVersionData.TABLE_NAME)
+  private Boolean selfSigned;
+
+
   public CertificateCredentialVersionData() {
     super();
   }
@@ -97,16 +104,42 @@ public class CertificateCredentialVersionData extends CredentialVersionData<Cert
     this.transitional = transitional;
   }
 
+  public boolean isSelfSigned() {
+    if (selfSigned == null) {
+      return false;
+    }
+
+    return selfSigned;
+  }
+
+  public void setSelfSigned(boolean selfSigned) {
+    this.selfSigned = selfSigned;
+  }
+
+  public boolean isCertificateAuthority() {
+    if (certificateAuthority == null) {
+      return false;
+    }
+
+    return certificateAuthority;
+  }
+
+  public void setCertificateAuthority(boolean certificateAuthority) {
+    this.certificateAuthority = certificateAuthority;
+  }
+
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final CertificateCredentialVersionData that = (CertificateCredentialVersionData) o;
+    CertificateCredentialVersionData that = (CertificateCredentialVersionData) o;
     return transitional == that.transitional &&
+      certificateAuthority == that.certificateAuthority &&
+      selfSigned == that.selfSigned &&
       Objects.equals(ca, that.ca) &&
       Objects.equals(certificate, that.certificate) &&
       Objects.equals(caName, that.caName) &&
@@ -115,7 +148,7 @@ public class CertificateCredentialVersionData extends CredentialVersionData<Cert
 
   @Override
   public int hashCode() {
-    return Objects.hash(ca, certificate, caName, transitional, expiryDate);
+    return Objects.hash(ca, certificate, caName, transitional, expiryDate, certificateAuthority, selfSigned);
   }
 
   @Override
@@ -126,6 +159,8 @@ public class CertificateCredentialVersionData extends CredentialVersionData<Cert
       ", caName='" + caName + '\'' +
       ", transitional=" + transitional +
       ", expiryDate=" + expiryDate +
+      ", certificateAuthority=" + certificateAuthority +
+      ", selfSigned=" + selfSigned +
       '}';
   }
 }
