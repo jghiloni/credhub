@@ -13,10 +13,10 @@ import org.cloudfoundry.credhub.exceptions.ParameterizedValidationException;
 @Component
 public class CertificateAuthorityService {
 
-  private final DefaultCertificateVersionDataService certificateVersionDataService;
+  private final CertificateVersionDataService certificateVersionDataService;
 
   @Autowired
-  public CertificateAuthorityService(final DefaultCertificateVersionDataService certificateVersionDataService) {
+  public CertificateAuthorityService(final CertificateVersionDataService certificateVersionDataService) {
     super();
     this.certificateVersionDataService = certificateVersionDataService;
   }

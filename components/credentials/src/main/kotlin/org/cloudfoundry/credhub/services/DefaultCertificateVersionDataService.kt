@@ -7,10 +7,12 @@ import org.cloudfoundry.credhub.entity.CertificateCredentialVersionData
 import org.cloudfoundry.credhub.entity.CredentialVersionData
 import org.cloudfoundry.credhub.repositories.CredentialVersionRepository
 import org.cloudfoundry.credhub.utils.CertificateReader
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import java.util.ArrayList
 import java.util.UUID
 
+@Profile("!remote")
 @Service
 class DefaultCertificateVersionDataService(
     private val credentialVersionRepository: CredentialVersionRepository,
