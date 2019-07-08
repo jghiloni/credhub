@@ -399,6 +399,7 @@ public class CredentialsGetIntegrationTest {
     certificate.setUuid(uuid);
     certificate.setVersionCreatedAt(FROZEN_TIME);
     certificate.setCa(TestConstants.TEST_CERTIFICATE);
+    certificate.setTrustedCa(TestConstants.OTHER_TEST_CERTIFICATE);
     certificate.setCaName("/some-ca");
     certificate.setCertificate(TestConstants.TEST_CERTIFICATE);
     certificate.getCredential().setUuid(uuid);

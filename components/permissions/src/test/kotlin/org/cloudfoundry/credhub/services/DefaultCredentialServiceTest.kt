@@ -142,6 +142,7 @@ class DefaultCredentialServiceTest {
         certificate.credential.uuid = certUuid
         certificate.uuid = certUuid
         certificate.ca = TestConstants.TEST_CERTIFICATE
+        certificate.trustedCa = TestConstants.TEST_CA
         `when`<List<CredentialVersion>>(credentialVersionDataService.findActiveByName(certificate.caName))
                 .thenReturn(Arrays.asList<CredentialVersion>(nonTransitionalCa, transitionalCa))
     }

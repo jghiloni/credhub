@@ -128,12 +128,10 @@ class DefaultCredentialService(
         if (!concatenateCas) return credentialVersions
         return credentialVersions.map {
             val certificateCredentialVersion = it as? CertificateCredentialVersion ?: return credentialVersions
-            if (certificateCredentialVersion.caName != null) {
-                val findActiveWithTransitional = credentialVersionDataService.findActiveByName(certificateCredentialVersion.caName)
-                certificateCredentialVersion.ca = findActiveWithTransitional?.joinToString("\n") { credentialVersion ->
-                    credentialVersion as CertificateCredentialVersion
-                    credentialVersion.certificate.trim()
-                } ?: certificateCredentialVersion.ca
+            if (!certificateCredentialVersion.trustedCa.isNullOrEmpty()) {
+                val trustedCa = certificateCredentialVersion.trustedCa
+                val ca = certificateCredentialVersion.ca
+                certificateCredentialVersion.ca = listOf(ca.trim(), trustedCa.trim()).joinToString("\n")
             }
             certificateCredentialVersion
         }

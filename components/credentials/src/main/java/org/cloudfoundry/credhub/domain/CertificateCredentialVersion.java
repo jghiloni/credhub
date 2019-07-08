@@ -65,6 +65,14 @@ public class CertificateCredentialVersion extends CredentialVersion {
     }
   }
 
+  public String getTrustedCa() {
+    return delegate.getTrustedCa();
+  }
+
+  public void setTrustedCa(final String trustedCa) {
+    delegate.setTrustedCa(trustedCa);
+  }
+
   public String getPrivateKey() {
     return (String) super.getValue();
   }
