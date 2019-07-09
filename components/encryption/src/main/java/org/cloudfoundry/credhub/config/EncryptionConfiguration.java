@@ -2,13 +2,16 @@ package org.cloudfoundry.credhub.config;
 
 public class EncryptionConfiguration {
   private Integer port;
-  private String host;
   private String partition;
   private String partitionPassword;
   private String serverCa;
   private String clientCertificate;
   private String clientKey;
+
+  private String host;
+
   private String endpoint;
+  private String ca;
 
   public String getServerCa() {
     return serverCa;
@@ -70,18 +73,30 @@ public class EncryptionConfiguration {
     return endpoint;
   }
 
-  public void setEndpoint(final String endpoint) {
+  public void setEndpoint(String endpoint) {
     this.endpoint = endpoint;
+  }
+
+  public String getCa() {
+    return ca;
+  }
+
+  public void setCa(String ca) {
+    this.ca = ca;
   }
 
   @Override
   public String toString() {
     return "EncryptionConfiguration{" +
       "port=" + port +
-      ", host='" + host + '\'' +
       ", partition='" + partition + '\'' +
       ", partitionPassword='" + partitionPassword + '\'' +
+      ", serverCa='" + serverCa + '\'' +
+      ", clientCertificate='" + clientCertificate + '\'' +
+      ", clientKey='" + clientKey + '\'' +
+      ", host='" + host + '\'' +
       ", endpoint='" + endpoint + '\'' +
+      ", ca='" + ca + '\'' +
       '}';
   }
 }
