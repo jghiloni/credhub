@@ -15,6 +15,20 @@ public class CertificateValueView implements CredentialValue {
     this.privateKey = value.getPrivateKey();
   }
 
+  public CertificateValueView(final CertificateCredentialVersion value, boolean concatenateCas) {
+    super();
+    if(!concatenateCas || value.getTrustedCa() == null || value.getTrustedCa().isEmpty()) {
+      this.ca = value.getCa();
+    } else {
+      String trustedCa = value.getTrustedCa();
+      String ca = value.getCa();
+      this.ca = ca.trim() + "\n" + trustedCa.trim();
+    }
+    this.certificate = value.getCertificate();
+    this.privateKey = value.getPrivateKey();
+  }
+
+
   public String getPrivateKey() {
     return privateKey;
   }

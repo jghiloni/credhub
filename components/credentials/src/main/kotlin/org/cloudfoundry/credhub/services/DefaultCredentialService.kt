@@ -58,7 +58,7 @@ class DefaultCredentialService(
             auditRecord.addResource(credentialVersion.credential)
         }
 
-        return concatenateCas(credentialList)
+        return credentialList
     }
 
     override fun findNByName(credentialName: String, numberOfVersions: Int): List<CredentialVersion> {
@@ -66,9 +66,7 @@ class DefaultCredentialService(
             throw InvalidQueryParameterException(ErrorMessages.INVALID_QUERY_PARAMETER, "versions")
         }
 
-        val credentialList = credentialVersionDataService.findNByName(credentialName, numberOfVersions)
-
-        return concatenateCas(credentialList)
+        return credentialVersionDataService.findNByName(credentialName, numberOfVersions)
     }
 
     override fun findActiveByName(credentialName: String): List<CredentialVersion> {
@@ -79,7 +77,7 @@ class DefaultCredentialService(
             auditRecord.addResource(credentialVersion.credential)
         }
 
-        return concatenateCas(credentialList)
+        return credentialList
     }
 
     override fun findByUuid(credentialUUID: UUID): Credential {
@@ -100,7 +98,7 @@ class DefaultCredentialService(
             throw EntryNotFoundException(ErrorMessages.Credential.INVALID_ACCESS)
         }
 
-        return concatenateCas(listOf(credentialVersion))[0]
+        return listOf(credentialVersion)[0]
     }
 
     override fun findAllCertificateCredentialsByCaName(caName: String): List<String> {
@@ -124,18 +122,18 @@ class DefaultCredentialService(
         return credentialVersionDataService.findMostRecent(credentialName)
     }
 
-    private fun concatenateCas(credentialVersions: List<CredentialVersion>): List<CredentialVersion> {
-        if (!concatenateCas) return credentialVersions
-        return credentialVersions.map {
-            val certificateCredentialVersion = it as? CertificateCredentialVersion ?: return credentialVersions
-            if (!certificateCredentialVersion.trustedCa.isNullOrEmpty()) {
-                val trustedCa = certificateCredentialVersion.trustedCa
-                val ca = certificateCredentialVersion.ca
-                certificateCredentialVersion.ca = listOf(ca.trim(), trustedCa.trim()).joinToString("\n")
-            }
-            certificateCredentialVersion
-        }
-    }
+//    private fun concatenateCas(credentialVersions: List<CredentialVersion>): List<CredentialVersion> {
+//        if (!concatenateCas) return credentialVersions
+//        return credentialVersions.map {
+//            val certificateCredentialVersion = it as? CertificateCredentialVersion ?: return credentialVersions
+//            if (!certificateCredentialVersion.trustedCa.isNullOrEmpty()) {
+//                val trustedCa = certificateCredentialVersion.trustedCa
+//                val ca = certificateCredentialVersion.ca
+//                certificateCredentialVersion.ca = listOf(ca.trim(), trustedCa.trim()).joinToString("\n")
+//            }
+//            certificateCredentialVersion
+//        }
+//    }
 
     private fun makeAndSaveNewCredential(
         existingCredentialVersion: CredentialVersion?,

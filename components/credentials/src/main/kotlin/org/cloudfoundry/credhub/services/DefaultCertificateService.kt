@@ -85,7 +85,7 @@ class DefaultCertificateService(
             throw EntryNotFoundException(ErrorMessages.Credential.INVALID_ACCESS)
         }
 
-        return concatenateCas(list)
+        return list
     }
 
     fun getAllValidVersions(uuid: UUID): List<CredentialVersion> {
@@ -191,18 +191,19 @@ class DefaultCertificateService(
         return version
     }
 
-    private fun concatenateCas(credentialVersions: List<CredentialVersion>): List<CredentialVersion> {
-        if (!concatenateCas) return credentialVersions
-        return credentialVersions.map {
-            val certificateCredentialVersion = it as? CertificateCredentialVersion ?: return credentialVersions
-            if (!certificateCredentialVersion.trustedCa.isNullOrEmpty()) {
-                val trustedCa = certificateCredentialVersion.trustedCa
-                val ca = certificateCredentialVersion.ca
-                certificateCredentialVersion.ca = listOf(ca.trim(), trustedCa.trim()).joinToString("\n")
-            }
-            certificateCredentialVersion
-        }
-    }
+//    private fun concatenateCas(credentialVersions: List<CredentialVersion>): List<CredentialVersion> {
+//        if (!concatenateCas) return credentialVersions
+//        return credentialVersions.map {
+//            val certificateCredentialVersion = it as? CertificateCredentialVersion ?: return credentialVersions
+//            if (!certificateCredentialVersion.trustedCa.isNullOrEmpty()) {
+//                val trustedCa = certificateCredentialVersion.trustedCa
+//                val ca = certificateCredentialVersion.ca
+//                certificateCredentialVersion.ca = listOf(ca.trim(), trustedCa.trim()).joinToString("\n")
+//            }
+//            certificateCredentialVersion
+//        }
+//    }
+
 
     private fun createNewChildVersions(parentCredentialName: String) {
         if (!concatenateCas) {
@@ -247,27 +248,21 @@ class DefaultCertificateService(
             val credentialVersion = credentialVersionDataService.findMostRecent(it) as? CertificateCredentialVersion
             val credential = credentialVersion?.credential
 
-            val ca = credentialVersion?.ca
+            val signingCa = credentialVersion?.ca
             var trustedCa: CertificateCredentialVersion? = null
             val activeWithTransitional = certificateVersionDataService.findActiveWithTransitional(parentCredentialName)
 
+            val caVersion1 = activeWithTransitional?.get(0) as CertificateCredentialVersion
+            val caVersion2 = activeWithTransitional[1] as CertificateCredentialVersion // Don't want this
 
-            val mapIndexed = activeWithTransitional?.forEach { version ->
-                val caVersion = version as CertificateCredentialVersion
-
-                if (caVersion.certificate == ca)
-                if (caVersion.isVersionTransitional)
+            if (caVersion1.certificate != signingCa) {
+                if(activeWithTransitional.size == 2 || caVersion1.isVersionTransitional) {
+                    trustedCa = caVersion1
+                }
+            } else if (activeWithTransitional.size == 2) {
+                trustedCa = caVersion2
             }
-//                if (caVersion.certificate != ca) {
-//                    if (!caVersion.isVersionTransitional && trustedCa == null) {
-//                        // Either certificate was signed by a version that is now transitional or signing version has been deleted
-//                        if (activeWithTransitional.size == 2) {
-//                            trustedCa = caVersion
-//                        }
-//                    } else {
-//                        trustedCa = caVersion
-//                    }
-//                }
+
                 /**
 
                     +--------+--------------+---------+---------------------------+
@@ -281,20 +276,20 @@ class DefaultCertificateService(
                     +--------+--------------+---------+---------------------------+
                     | 1      | False        | False   | none                      |
                     +--------+--------------+---------+---------------------------+
-                    | 2      | True         | True    | non-transitional version  |
+                    | 2      | True         | True    | non-transitional version  |    \
+                    +--------+--------------+---------+---------------------------+     -- step 3
+                    | 2      | False        | False   | non-transitional version  |    /
                     +--------+--------------+---------+---------------------------+
-                    | 2      | True         | False   | transitional version      |
-                    +--------+--------------+---------+---------------------------+
-                    | 2      | False        | True    | transitional version      |
-                    +--------+--------------+---------+---------------------------+
-                    | 2      | False        | False   | transitional version      |
+                    | 2      | True         | False   | transitional version      |    \
+                    +--------+--------------+---------+---------------------------+     -- steps 2,4
+                    | 2      | False        | True    | transitional version      |    /
                     +--------+--------------+---------+---------------------------+
 
                  */
 
 
             val value = CertificateCredentialValue(
-                ca,
+                signingCa,
                 credentialVersion?.certificate,
                 credentialVersion?.privateKey,
                 credentialVersion?.caName,
@@ -311,7 +306,6 @@ class DefaultCertificateService(
 
             credentialVersionDataService.save(newCredentialVersion)
         }
-
     }
 
     private fun versionDoesNotBelongToCertificate(certificate: Credential, version: CertificateCredentialVersion?): Boolean {
