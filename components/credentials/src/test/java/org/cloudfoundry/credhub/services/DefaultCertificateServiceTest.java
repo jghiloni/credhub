@@ -736,7 +736,6 @@ public class DefaultCertificateServiceTest {
     verify(credentialVersionDataService, Mockito.times(1)).save(newChildCert);
   }
 
-
   @Test
   public void updateTransitionalVersion__whenConcatenateCasIsFalse__doesNotGenerateNewChildVersion() {
     when(certificateDataService.findByUuid(caUuid)).thenReturn(credential);
@@ -759,7 +758,7 @@ public class DefaultCertificateServiceTest {
   }
 
   @Test
-  public void getVersions__whenConcatenateCasIsTrue__returnsConcatenatedCas() {
+  public void getVersions__whenConcatenateCasIsTrue__returnsSingleCa() {
     UUID certUuid = UUID.randomUUID();
     CertificateCredentialVersion nonTransitionalCa = mock(CertificateCredentialVersion.class);
     when(nonTransitionalCa.getCertificate())
@@ -773,7 +772,6 @@ public class DefaultCertificateServiceTest {
     certificate.getCredential().setUuid(certUuid);
     certificate.setUuid(certUuid);
     certificate.setCa(TestConstants.TEST_CERTIFICATE);
-    certificate.setTrustedCa(TestConstants.TEST_CA);
     when(credentialVersionDataService.findActiveByName(certificate.getCaName()))
             .thenReturn(Arrays.asList(nonTransitionalCa, transitionalCa));
     when(certificateVersionDataService.findAllVersions(certUuid))
@@ -786,45 +784,6 @@ public class DefaultCertificateServiceTest {
     when(userContext.getActor()).thenReturn(user);
 
     final List<CredentialVersion> results = subjectWithConcatenateCas.getVersions(certUuid, false);
-    CertificateCredentialVersion resultCert = (CertificateCredentialVersion) results.get(0);
-
-    List<String> allMatches = new ArrayList<>();
-    Matcher m = Pattern.compile("BEGIN CERTIFICATE")
-            .matcher(resultCert.getCa());
-    while (m.find()) {
-      allMatches.add(m.group());
-    }
-    assertThat(allMatches.size(), equalTo(2));
-
-  }
-
-  @Test
-  public void getVersions__whenConcatenateCasIsFalse__returnsSingleCa() {
-    UUID certUuid = UUID.randomUUID();
-    CertificateCredentialVersion nonTransitionalCa = mock(CertificateCredentialVersion.class);
-    when(nonTransitionalCa.getCertificate())
-            .thenReturn(TestConstants.TEST_CERTIFICATE);
-    CertificateCredentialVersion transitionalCa = mock(CertificateCredentialVersion.class);
-    when(transitionalCa.getCertificate())
-            .thenReturn(TestConstants.OTHER_TEST_CERTIFICATE);
-
-    CertificateCredentialVersion certificate = new CertificateCredentialVersion("some-cert");
-    certificate.setCaName("testCa");
-    certificate.getCredential().setUuid(certUuid);
-    certificate.setUuid(certUuid);
-    certificate.setCa(TestConstants.TEST_CERTIFICATE);
-    when(credentialVersionDataService.findActiveByName(certificate.getCaName()))
-            .thenReturn(Arrays.asList(nonTransitionalCa, transitionalCa));
-    when(certificateVersionDataService.findAllVersions(certUuid))
-            .thenReturn(Collections.singletonList(certificate));
-
-    final UserContext userContext = mock(UserContext.class);
-    when(userContextHolder.getUserContext()).thenReturn(userContext);
-
-    final String user = "my-user";
-    when(userContext.getActor()).thenReturn(user);
-
-    final List<CredentialVersion> results = subjectWithoutConcatenateCas.getVersions(certUuid, false);
     CertificateCredentialVersion resultCert = (CertificateCredentialVersion) results.get(0);
 
     List<String> allMatches = new ArrayList<>();

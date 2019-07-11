@@ -17,7 +17,6 @@ import org.cloudfoundry.credhub.requests.BaseCredentialGenerateRequest
 import org.cloudfoundry.credhub.requests.BaseCredentialRequest
 import org.cloudfoundry.credhub.requests.BaseCredentialSetRequest
 import org.cloudfoundry.credhub.views.FindCredentialResult
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -27,8 +26,7 @@ class DefaultCredentialService(
     private val credentialFactory: CredentialFactory,
     private val certificateAuthorityService: CertificateAuthorityService,
     private val credentialDataService: CredentialDataService,
-    private val auditRecord: CEFAuditRecord,
-    @Value("\${certificates.concatenate_cas:false}") var concatenateCas: Boolean
+    private val auditRecord: CEFAuditRecord
 )
     : CredentialService {
 

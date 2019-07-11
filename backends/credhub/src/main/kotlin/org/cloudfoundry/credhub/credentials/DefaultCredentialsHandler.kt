@@ -139,7 +139,7 @@ class DefaultCredentialsHandler(
         if (credentialVersions.isEmpty()) {
             throw EntryNotFoundException(ErrorMessages.Credential.INVALID_ACCESS)
         }
-        return DataResponse.fromEntity(credentialVersions)
+        return DataResponse.fromEntity(credentialVersions, concatenateCas)
     }
 
     override fun getAllCredentialVersions(credentialName: String): DataResponse {

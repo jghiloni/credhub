@@ -191,57 +191,10 @@ class DefaultCertificateService(
         return version
     }
 
-//    private fun concatenateCas(credentialVersions: List<CredentialVersion>): List<CredentialVersion> {
-//        if (!concatenateCas) return credentialVersions
-//        return credentialVersions.map {
-//            val certificateCredentialVersion = it as? CertificateCredentialVersion ?: return credentialVersions
-//            if (!certificateCredentialVersion.trustedCa.isNullOrEmpty()) {
-//                val trustedCa = certificateCredentialVersion.trustedCa
-//                val ca = certificateCredentialVersion.ca
-//                certificateCredentialVersion.ca = listOf(ca.trim(), trustedCa.trim()).joinToString("\n")
-//            }
-//            certificateCredentialVersion
-//        }
-//    }
-
-
     private fun createNewChildVersions(parentCredentialName: String) {
         if (!concatenateCas) {
             return
         }
-
-        /**
-            on regenerate
-            sign with latest non transitional
-
-            signing ca is always ca field
-            trusted ca will be transitional or latest non transitional or null
-
-            step 0
-            ca -> no transitional versions
-            cert -> ca field= version1 (signing ca), trusted ca= empty (no transitional version)
-
-            step 1 -> regenerate ca
-            ca -> 2 versions, none transitional
-            cert -> ca field= version1 (signing ca), trusted ca=empty (no transitional version)
-
-            step 2 -> set new ca as transitional
-            ca -> 2 versions, 2=transitional
-            cert -> 2 versions, ca field= version1, trusted ca=version2(transitional)
-
-            step 3 -> move transitional flag
-            ca -> 2 versions, 1=transitional
-            cert -> 2 versions, ca field= version1, trusted ca= version2(signing ca is transitional, so we use latest non transitional here)
-
-            step 4 -> bulk-regenerate
-            ca -> 2 versions, 1=transitional
-            cert -> 3 versions, ca field=version2, trusted ca=version1 (transitional version)
-
-            step 5 -> remove transitional flag
-            ca -> 2 versions, none transitional
-            cert -> 4 versions, ca field=version2, trusted ca= empty(no transitional version)
-        */
-
 
         val signedCertificates = findSignedCertificates(parentCredentialName)
         signedCertificates.forEach {
@@ -252,41 +205,15 @@ class DefaultCertificateService(
             var trustedCa: CertificateCredentialVersion? = null
             val activeWithTransitional = certificateVersionDataService.findActiveWithTransitional(parentCredentialName)
 
-            val caVersion1 = activeWithTransitional?.get(0) as CertificateCredentialVersion
-            val caVersion2 = activeWithTransitional[1] as CertificateCredentialVersion // Don't want this
+            val caVersion = activeWithTransitional?.get(0) as CertificateCredentialVersion
 
-            if (caVersion1.certificate != signingCa) {
-                if(activeWithTransitional.size == 2 || caVersion1.isVersionTransitional) {
-                    trustedCa = caVersion1
+            if (caVersion.certificate != signingCa) {
+                if(activeWithTransitional.size == 2 || caVersion.isVersionTransitional) {
+                    trustedCa = caVersion
                 }
             } else if (activeWithTransitional.size == 2) {
-                trustedCa = caVersion2
+                trustedCa = activeWithTransitional[1] as CertificateCredentialVersion
             }
-
-                /**
-
-                    +--------+--------------+---------+---------------------------+
-                    | Length | Transitional | Signing | Result (Which is trusted) |
-                    +--------+--------------+---------+---------------------------+
-                    | 1      | True         | True    | none                      |
-                    +--------+--------------+---------+---------------------------+
-                    | 1      | True         | False   | transitional version      |
-                    +--------+--------------+---------+---------------------------+
-                    | 1      | False        | True    | none                      |
-                    +--------+--------------+---------+---------------------------+
-                    | 1      | False        | False   | none                      |
-                    +--------+--------------+---------+---------------------------+
-                    | 2      | True         | True    | non-transitional version  |    \
-                    +--------+--------------+---------+---------------------------+     -- step 3
-                    | 2      | False        | False   | non-transitional version  |    /
-                    +--------+--------------+---------+---------------------------+
-                    | 2      | True         | False   | transitional version      |    \
-                    +--------+--------------+---------+---------------------------+     -- steps 2,4
-                    | 2      | False        | True    | transitional version      |    /
-                    +--------+--------------+---------+---------------------------+
-
-                 */
-
 
             val value = CertificateCredentialValue(
                 signingCa,
