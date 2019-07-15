@@ -120,19 +120,6 @@ class DefaultCredentialService(
         return credentialVersionDataService.findMostRecent(credentialName)
     }
 
-//    private fun concatenateCas(credentialVersions: List<CredentialVersion>): List<CredentialVersion> {
-//        if (!concatenateCas) return credentialVersions
-//        return credentialVersions.map {
-//            val certificateCredentialVersion = it as? CertificateCredentialVersion ?: return credentialVersions
-//            if (!certificateCredentialVersion.trustedCa.isNullOrEmpty()) {
-//                val trustedCa = certificateCredentialVersion.trustedCa
-//                val ca = certificateCredentialVersion.ca
-//                certificateCredentialVersion.ca = listOf(ca.trim(), trustedCa.trim()).joinToString("\n")
-//            }
-//            certificateCredentialVersion
-//        }
-//    }
-
     private fun makeAndSaveNewCredential(
         existingCredentialVersion: CredentialVersion?,
         credentialValue: CredentialValue?,

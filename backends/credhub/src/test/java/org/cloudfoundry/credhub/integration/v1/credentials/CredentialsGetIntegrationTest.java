@@ -63,7 +63,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
   },
   resolver = DatabaseProfileResolver.class
 )
-@TestPropertySource(properties = {"certificates.concatenate_cas=false"})
+@TestPropertySource(properties = {"certificates.concatenate_cas=false", })
 @SpringBootTest(classes = CredhubTestApp.class)
 @Transactional
 public class CredentialsGetIntegrationTest {

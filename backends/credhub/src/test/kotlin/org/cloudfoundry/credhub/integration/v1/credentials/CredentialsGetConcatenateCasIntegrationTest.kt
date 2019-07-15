@@ -37,7 +37,6 @@ import java.time.Instant
 import java.util.Arrays
 import java.util.UUID
 
-
 @RunWith(SpringRunner::class)
 @ActiveProfiles(value = ["unit-test", "unit-test-permissions"], resolver = DatabaseProfileResolver::class)
 @SpringBootTest(classes = [CredhubTestApp::class])
@@ -148,7 +147,6 @@ class CredentialsGetConcatenateCasIntegrationTest {
             .andExpect(jsonPath("$.data[1].type").value("certificate"))
             .andExpect(jsonPath("$.data[1].value.certificate").value(TestConstants.TEST_CA))
             .andExpect(jsonPath("$.data[1].value.ca").value(TestConstants.TEST_CA))
-
     }
 
     @Test

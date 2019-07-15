@@ -123,7 +123,6 @@ class DefaultCertificateService(
 
         val name = credential.name
 
-        //todo: handle unset transitional - currently it is not setting the correct ca
         certificateVersionDataService.unsetTransitionalVersion(certificateUuid)
 
         if (newTransitionalVersionUuid != null) {
@@ -208,7 +207,7 @@ class DefaultCertificateService(
             val caVersion = activeWithTransitional?.get(0) as CertificateCredentialVersion
 
             if (caVersion.certificate != signingCa) {
-                if(activeWithTransitional.size == 2 || caVersion.isVersionTransitional) {
+                if (activeWithTransitional.size == 2 || caVersion.isVersionTransitional) {
                     trustedCa = caVersion
                 }
             } else if (activeWithTransitional.size == 2) {

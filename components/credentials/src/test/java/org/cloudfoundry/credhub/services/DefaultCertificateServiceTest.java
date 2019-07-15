@@ -224,7 +224,7 @@ public class DefaultCertificateServiceTest {
       .thenReturn(Collections.singletonList("some-cert"));
     when(credentialVersionDataService.findMostRecent(childCert.getName()))
       .thenReturn(childCert);
-    when(certificateCredentialFactory.makeNewCredentialVersion(eq(childCert.getCredential()),any()))
+    when(certificateCredentialFactory.makeNewCredentialVersion(eq(childCert.getCredential()), any()))
       .thenReturn(newChildCert);
     when(credentialService.save(nonTransitionalCa, value, generateRequest))
       .thenReturn(transitionalCa);

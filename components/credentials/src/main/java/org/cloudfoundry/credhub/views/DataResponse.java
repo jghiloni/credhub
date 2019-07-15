@@ -26,7 +26,7 @@ public class DataResponse {
     return new DataResponse(views);
   }
 
-  public static DataResponse fromEntity(final List<CredentialVersion> models, boolean concatenateCas) {
+  public static DataResponse fromEntity(final List<CredentialVersion> models, final boolean concatenateCas) {
     final List<CredentialView> views = newArrayList();
     for (final CredentialVersion model : models) {
       if (model != null) {

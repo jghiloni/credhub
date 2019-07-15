@@ -35,7 +35,6 @@ import org.springframework.web.context.WebApplicationContext
 import java.time.Instant
 import java.util.UUID
 
-
 @RunWith(SpringRunner::class)
 @ActiveProfiles(value = ["unit-test", "unit-test-permissions"], resolver = DatabaseProfileResolver::class)
 @SpringBootTest(classes = [CredhubTestApp::class])

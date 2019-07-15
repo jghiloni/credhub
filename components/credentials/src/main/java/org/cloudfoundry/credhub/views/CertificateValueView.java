@@ -15,14 +15,14 @@ public class CertificateValueView implements CredentialValue {
     this.privateKey = value.getPrivateKey();
   }
 
-  public CertificateValueView(final CertificateCredentialVersion value, boolean concatenateCas) {
+  public CertificateValueView(final CertificateCredentialVersion value, final boolean concatenateCas) {
     super();
-    if(!concatenateCas || value.getTrustedCa() == null || value.getTrustedCa().isEmpty()) {
+    if (!concatenateCas || value.getTrustedCa() == null || value.getTrustedCa().isEmpty()) {
       this.ca = value.getCa();
     } else {
-      String trustedCa = value.getTrustedCa();
-      String ca = value.getCa();
-      this.ca = ca.trim() + "\n" + trustedCa.trim();
+      final String trustedCa = value.getTrustedCa();
+      final String ca = value.getCa();
+      this.ca = ca.trim() + "\n" + trustedCa.trim() + "\n";
     }
     this.certificate = value.getCertificate();
     this.privateKey = value.getPrivateKey();

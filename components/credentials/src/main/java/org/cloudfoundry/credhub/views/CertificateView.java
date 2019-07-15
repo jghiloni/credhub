@@ -10,7 +10,7 @@ import org.cloudfoundry.credhub.domain.CertificateCredentialVersion;
 @SuppressWarnings("unused")
 public class CertificateView extends CredentialView {
     @JsonIgnore
-    private boolean concatenateCas = false;
+    private boolean concatenateCas;
     private CertificateCredentialVersion version;
 
     private Instant expiryDate;
@@ -35,6 +35,7 @@ public class CertificateView extends CredentialView {
         this.certificateAuthority = version.isCertificateAuthority();
         this.selfSigned = version.isSelfSigned();
         this.generated = version.getGenerated();
+        this.concatenateCas = false;
     }
 
     public CertificateView(final CertificateCredentialVersion version, final boolean concatenateCas) {

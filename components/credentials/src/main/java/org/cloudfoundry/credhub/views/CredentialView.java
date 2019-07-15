@@ -46,7 +46,7 @@ public class CredentialView {
     return fromEntity(credentialVersion, false);
   }
 
-  public static CredentialView fromEntity(final CredentialVersion credentialVersion, boolean concatenateCas) {
+  public static CredentialView fromEntity(final CredentialVersion credentialVersion, final boolean concatenateCas) {
     final CredentialView result;
       if (credentialVersion instanceof ValueCredentialVersion) {
       result = new ValueView((ValueCredentialVersion) credentialVersion);
