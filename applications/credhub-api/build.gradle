@@ -99,9 +99,6 @@ bootRun {
 bootJar {
     archiveName = "credhub.jar"
     def versionFile = new File("$projectDir/src/main/resources/version")
-    if (System.getenv("VERSION")) {
-        versionFile.write(System.getenv("VERSION"))
-    }
 }
 
 test {
