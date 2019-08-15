@@ -1,24 +1,5 @@
 package org.cloudfoundry.credhub.integration;
 
-import java.io.ByteArrayInputStream;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
-
 import com.google.common.collect.ImmutableMap;
 import com.jayway.jsonpath.JsonPath;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
@@ -35,13 +16,28 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.cloudfoundry.credhub.AuthConstants.ALL_PERMISSIONS_TOKEN;
 import static org.cloudfoundry.credhub.AuthConstants.USER_B_TOKEN;
-import static org.cloudfoundry.credhub.helpers.RequestHelper.expect404WhileGeneratingCertificate;
-import static org.cloudfoundry.credhub.helpers.RequestHelper.generateCa;
-import static org.cloudfoundry.credhub.helpers.RequestHelper.generateCertificateCredential;
-import static org.cloudfoundry.credhub.helpers.RequestHelper.getCertificateCredentialsByName;
+import static org.cloudfoundry.credhub.helpers.RequestHelper.*;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -382,7 +378,7 @@ public class CertificateGenerateTest {
     final String transitionalCaCertificate = JsonPath.parse(transitionalCaResponse)
       .read("$.value.certificate");
 
-    final String generateCertificateResponse = generateCertificateCredential(
+    generateCertificateCredential(
       mockMvc,
       "/some-cert",
       true,
@@ -391,10 +387,21 @@ public class CertificateGenerateTest {
       ALL_PERMISSIONS_TOKEN
     );
 
-    final String actualCaCertificate = JsonPath.parse(generateCertificateResponse)
-      .read("$.value.ca");
+    final String getCertificateResponse = getCertificateCredentialsByName(mockMvc, ALL_PERMISSIONS_TOKEN, "/some-cert");
 
-    assertThat(actualCaCertificate, not(equalTo(transitionalCaCertificate)));
-    assertThat(actualCaCertificate, equalTo(originalCaCertificate));
+    final String certificateUuid = JsonPath.parse(getCertificateResponse)
+      .read("$.certificates[0].id");
+
+    final String regenerateCertificateResponse = regenerateCertificate(
+            mockMvc,
+            certificateUuid,
+            false,
+            ALL_PERMISSIONS_TOKEN
+    );
+
+    final String actualCaCertificate = JsonPath.parse(regenerateCertificateResponse)
+            .read("$.value.ca");
+
+    assertThat(actualCaCertificate, equalTo(originalCaCertificate + transitionalCaCertificate));
   }
 }
