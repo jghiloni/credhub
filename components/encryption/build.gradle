@@ -65,6 +65,7 @@ dependencies {
     //gRPC
     implementation "com.google.api.grpc:proto-google-common-protos:1.12.0"
     implementation "io.grpc:grpc-services:${grpcVersion}"
+    compile 'com.google.cloud:google-cloud-kms:1.32.0'
 
     //gRPC - Netty
     implementation "io.grpc:grpc-netty:${grpcVersion}"
