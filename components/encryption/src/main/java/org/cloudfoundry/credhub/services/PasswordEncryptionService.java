@@ -7,10 +7,12 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 
+import org.springframework.stereotype.Service;
+
 import org.cloudfoundry.credhub.config.EncryptionKeyMetadata;
 import org.cloudfoundry.credhub.constants.CipherTypes;
 
-
+@Service
 public class PasswordEncryptionService extends InternalEncryptionService {
   public static final int GCM_TAG_LENGTH = 128;
   private final PasswordKeyProxyFactory passwordKeyProxyFactory;
