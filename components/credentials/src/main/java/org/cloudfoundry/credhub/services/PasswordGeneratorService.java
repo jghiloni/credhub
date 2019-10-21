@@ -14,14 +14,17 @@ public class PasswordGeneratorService extends PasswordGeneratorServiceGrpc.Passw
 
   public PasswordGeneratorService(PasswordCredentialGenerator passwordCredentialGenerator) {
     this.passwordCredentialGenerator = passwordCredentialGenerator;
+    System.out.println("*****************PasswordGeneratorService Created***************");
   }
 
   @Override
   public void generate(GenerateRequest request, StreamObserver<GenerateResponse> responseObserver) {
+    System.out.println("Received Generate Request for length of " + request.getLength());
     StringGenerationParameters generationParameters = new StringGenerationParameters();
     generationParameters.setLength(Integer.parseInt(request.getLength()));
     StringCredentialValue generatedValue = passwordCredentialGenerator.generateCredential(generationParameters);
     String stringGeneratedValue = generatedValue.getStringCredential();
+    System.out.println("Generated value " + stringGeneratedValue);
     GenerateResponse response = GenerateResponse.newBuilder().setValue(stringGeneratedValue).build();
     responseObserver.onNext(response);
     responseObserver.onCompleted();

@@ -84,6 +84,7 @@ public class EncryptionKeyCanaryMapper {
         }
       }
     }
+    LOGGER.info("Created Canary");
     if (keySet.getActive() == null) {
       throw new RuntimeException("No active key was found");
     }

@@ -2,18 +2,25 @@ package org.cloudfoundry.credhub.services;
 
 import java.io.IOException;
 
+import javax.net.ssl.SSLContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
+import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.NettyServerBuilder;
+import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollDomainSocketChannel;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerDomainSocketChannel;
 import io.netty.channel.kqueue.KQueue;
+import io.netty.channel.kqueue.KQueueDomainSocketChannel;
 import io.netty.channel.kqueue.KQueueEventLoopGroup;
 import io.netty.channel.kqueue.KQueueServerDomainSocketChannel;
 import io.netty.channel.unix.DomainSocketAddress;
@@ -24,38 +31,50 @@ import org.cloudfoundry.credhub.generators.PasswordCredentialGenerator;
 public class PasswordGeneratorProvider {
   @Autowired
   private PasswordCredentialGenerator passwordCredentialGenerator;
-  private EventLoopGroup bossGroup;
   private EventLoopGroup workerGroup;
-  private Class<? extends ServerChannel> channelType;
+  private Class<? extends Channel> channelType;
+  private Class<? extends ServerChannel> serverChannelType;
   private ManagedChannel chan;
   Server server;
 
 
   public PasswordGeneratorProvider() throws IOException, InterruptedException {
     setChannelInfo();
+    chan = NettyChannelBuilder
+      .forAddress(new DomainSocketAddress("/socket/socketfile.sock"))
+      .eventLoopGroup(workerGroup)
+      .channelType(channelType)
+      .build();
     PasswordGeneratorService passwordGeneratorService = new PasswordGeneratorService(passwordCredentialGenerator);
     server = NettyServerBuilder.forAddress(new DomainSocketAddress("/socket/socketfile.sock"))
-      .bossEventLoopGroup(bossGroup)
+      .bossEventLoopGroup(workerGroup)
       .workerEventLoopGroup(workerGroup)
-      .channelType(channelType)
+      .channelType(serverChannelType)
       .addService(passwordGeneratorService)
       .build();
+    System.out.println("******************starting password generator server******************\n");
     server.start();
     server.awaitTermination();
   }
 
+  @Scheduled
+  public void status() {
+    System.out.println("Server status: is shutdown? " + server.isShutdown() + " is terminated? " + server.isTerminated());
+    System.out.println("Server listening on address: " + server.getListenSockets() + " " + server.getPort());
+  }
+
   private void setChannelInfo() {
     if (Epoll.isAvailable()) {
-      this.bossGroup = new EpollEventLoopGroup();
       this.workerGroup = new EpollEventLoopGroup();
-      this.channelType = EpollServerDomainSocketChannel.class;
+      this.channelType = EpollDomainSocketChannel.class;
+      this.serverChannelType = EpollServerDomainSocketChannel.class;
     } else {
       if (!KQueue.isAvailable()) {
         throw new RuntimeException("Unsupported OS '" + System.getProperty("os.name") + "', only Unix and Mac are supported");
       }
       this.workerGroup = new KQueueEventLoopGroup();
-      this.bossGroup = new KQueueEventLoopGroup();
-      this.channelType = KQueueServerDomainSocketChannel.class;
+      this.channelType = KQueueDomainSocketChannel.class;
+      this.serverChannelType = KQueueServerDomainSocketChannel.class;
     }
 
   }

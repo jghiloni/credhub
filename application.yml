@@ -1,0 +1,43 @@
+---
+auth-server:
+  url: https://localhost:8080/uaa
+  trust_store: "/app/trust_store.jks"
+  trust_store_password: "changeit"
+encryption:
+  key_creation_enabled: true
+  providers:
+  - provider_name: int
+    provider_type: internal
+    keys:
+    - active: true
+      encryption_password: YU9CJkKq88ScOaqhcoVaGFsJfBFxteMBGAhcCtFL
+security:
+  authorization:
+    acls:
+      enabled: true
+    permissions:
+      - actors:
+        - uaa-client:credhub_admin_client
+        operations:
+        - read
+        - write
+        - delete
+        - read_acl
+        - write_acl
+        path: "/*"
+    oauth2:
+      enabled: true
+server:
+  port: 8844
+  ssl:
+    enabled: false
+  certificates:
+    concatenate_cas: true
+  spring:
+    profiles:
+      active: prod
+spring:
+  flyway:
+    enabled: false
+  datasource:
+    username: admin
