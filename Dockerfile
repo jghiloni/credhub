@@ -6,7 +6,7 @@ COPY . /app
 RUN ./scripts/setup_dev_mtls.sh
 RUN ./gradlew clean bootJar
 
-FROM openjdk:8-jre-alpine
+FROM openjdk:8-jre-slim
 WORKDIR /app
 COPY \
   --from=0 \
