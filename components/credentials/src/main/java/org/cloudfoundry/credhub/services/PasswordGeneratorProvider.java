@@ -2,8 +2,7 @@ package org.cloudfoundry.credhub.services;
 
 import java.io.IOException;
 
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.grpc.ManagedChannel;
@@ -22,21 +21,21 @@ import io.netty.channel.kqueue.KQueueDomainSocketChannel;
 import io.netty.channel.kqueue.KQueueEventLoopGroup;
 import io.netty.channel.kqueue.KQueueServerDomainSocketChannel;
 import io.netty.channel.unix.DomainSocketAddress;
+import org.passay.PasswordGenerator;
 
 
 @Component
-@EnableScheduling
 public class PasswordGeneratorProvider {
 
+  private final PasswordGeneratorService passwordGeneratorService;
   private EventLoopGroup workerGroup;
   private Class<? extends Channel> channelType;
   private Class<? extends ServerChannel> serverChannelType;
   private ManagedChannel chan;
-  private PasswordGeneratorService passwordGeneratorService;
   Server server;
 
-
-  public PasswordGeneratorProvider() throws IOException {
+  @Autowired
+  public PasswordGeneratorProvider(RandomNumberGenerator rng) throws IOException {
     setChannelInfo();
     chan = NettyChannelBuilder
       .forAddress(new DomainSocketAddress("/socket/socketfile.sock"))
@@ -44,23 +43,14 @@ public class PasswordGeneratorProvider {
       .eventLoopGroup(workerGroup)
       .channelType(channelType)
       .build();
-    passwordGeneratorService = new PasswordGeneratorService();
+    passwordGeneratorService = new PasswordGeneratorService(new PasswordGenerator(rng.getSecureRandom()));
     server = NettyServerBuilder.forAddress(new DomainSocketAddress("/socket/socketfile.sock"))
       .bossEventLoopGroup(workerGroup)
       .workerEventLoopGroup(workerGroup)
       .channelType(serverChannelType)
       .addService(passwordGeneratorService)
       .build();
-    System.out.println("******************starting password generator server******************\n");
     server.start();
-//    server.awaitTermination();
-  }
-
-  @Scheduled(fixedDelay = 30000, initialDelay = 0)
-  public void status() {
-    System.out
-      .println("Server status: is shutdown? " + server.isShutdown() + " is terminated? " + server.isTerminated());
-    System.out.println("Server listening on address: " + server.getListenSockets() + " " + server.getPort());
   }
 
   private void setChannelInfo() {
