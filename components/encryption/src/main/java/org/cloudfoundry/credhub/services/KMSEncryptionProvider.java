@@ -31,7 +31,7 @@ import org.cloudfoundry.credhub.services.grpc.DecryptRequest;
 import org.cloudfoundry.credhub.services.grpc.DecryptResponse;
 import org.cloudfoundry.credhub.services.grpc.EncryptRequest;
 import org.cloudfoundry.credhub.services.grpc.EncryptResponse;
-import org.cloudfoundry.credhub.services.grpc.KeyManagementServiceGrpc;
+import v1beta1.KeyManagementServiceGrpc;
 import org.cloudfoundry.credhub.utils.StringUtil;
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_KEEPALIVE_TIMEOUT_NANOS;
