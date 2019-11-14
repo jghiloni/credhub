@@ -2,6 +2,7 @@ buildscript {
     ext {
         grpcVersion = '1.23.0'
         nettyVersion = '4.1.29.Final'
+        mockitoKotlinVersion = '1.6.0'
     }
     repositories {
         mavenCentral()
@@ -37,6 +38,8 @@ dependencies {
     implementation project(":components:errors")
     implementation project(":components:string-utilities")
     implementation project(":components:time-support")
+
+    testImplementation group: "com.nhaarman", name: "mockito-kotlin", version: "${mockitoKotlinVersion}"
 
     testImplementation project(path: ":components:test-support", configuration: "testOutput")
 
