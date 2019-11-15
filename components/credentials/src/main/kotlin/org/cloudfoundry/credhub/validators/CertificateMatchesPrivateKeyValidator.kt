@@ -26,7 +26,7 @@ class CertificateMatchesPrivateKeyValidator : ConstraintValidator<RequireCertifi
         val certificate = certificateReader.certificate
         val certificatePublicKey = certificate.publicKey
 
-        val publicKey = PrivateKeyReader.getPublicKey(privateKeyValue)
+        val publicKey = privateKeyValue?.let { PrivateKeyReader.getPublicKey(it) }
 
         return publicKey == certificatePublicKey
     }

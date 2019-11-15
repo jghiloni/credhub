@@ -61,7 +61,7 @@ class DefaultCertificatesHandler(
         val credentialValue = credentialGenerator
             .generate(generateRequest) as CertificateCredentialValue
 
-        credentialValue.isTransitional = request.isTransitional
+        credentialValue.transitional = request.isTransitional
 
         val credentialVersion = certificateService
             .save(
@@ -139,7 +139,7 @@ class DefaultCertificatesHandler(
         checkPermissionsByUuid(certificateId, WRITE)
 
         val certificateCredentialValue = requestBody.value
-        certificateCredentialValue.isTransitional = requestBody.isTransitional
+        certificateCredentialValue.transitional = requestBody.isTransitional
         val credentialVersion = certificateService.set(
             UUID.fromString(certificateId),
             certificateCredentialValue
